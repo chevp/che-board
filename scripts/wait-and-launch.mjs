@@ -27,10 +27,9 @@ async function main() {
     process.exit(1);
   }
   process.stdout.write("[che-board] launching electron\n");
-  const proc = spawn("npx", ["electron", "."], {
-    stdio: "inherit",
-    env: { ...process.env, CHE_BOARD_DEV_URL: URL },
-  });
+  const env = { ...process.env, CHE_BOARD_DEV_URL: URL };
+  delete env.ELECTRON_RUN_AS_NODE;
+  const proc = spawn("npx", ["electron", "."], { stdio: "inherit", env });
   proc.on("exit", (code) => process.exit(code ?? 0));
 }
 

@@ -1,11 +1,11 @@
 import { app, BrowserWindow, ipcMain, dialog } from "electron";
 import * as path from "node:path";
 import { registerChiIpc } from "./chi-bridge";
+import { startChiServer } from "./chi-serve";
 
-const DEV_SERVER_URL = process.env["CHE_BOARD_DEV_URL"];
-const isDev = !!DEV_SERVER_URL;
+const DEV_OVERRIDE_URL = process.env["CHE_BOARD_DEV_URL"];
 
-function createWindow(): BrowserWindow {
+function createWindow(targetUrl: string): BrowserWindow {
   const win = new BrowserWindow({
     width: 1280,
     height: 820,
@@ -21,22 +21,29 @@ function createWindow(): BrowserWindow {
     },
   });
 
-  if (isDev) {
-    win.loadURL(DEV_SERVER_URL!);
+  win.loadURL(targetUrl);
+  if (DEV_OVERRIDE_URL || !app.isPackaged) {
     win.webContents.openDevTools({ mode: "detach" });
-  } else {
-    win.loadFile(path.join(__dirname, "..", "dist", "renderer", "browser", "index.html"));
   }
 
   return win;
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   registerChiIpc(ipcMain, dialog);
-  createWindow();
+
+  let targetUrl: string;
+  if (DEV_OVERRIDE_URL) {
+    targetUrl = DEV_OVERRIDE_URL;
+  } else {
+    const server = await startChiServer();
+    targetUrl = server.url;
+  }
+
+  createWindow(targetUrl);
 
   app.on("activate", () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+    if (BrowserWindow.getAllWindows().length === 0) createWindow(targetUrl);
   });
 });
 
