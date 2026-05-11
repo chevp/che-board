@@ -1,58 +1,73 @@
-# che-board
+# Che Board
 
-Desktop console for the [`chi`](https://github.com/chevp/chi) CLI — an Electron + Angular GUI modeled on chi's own `context/prototypes/ux-console`.
+A friendly desktop app for the [`chi`](https://github.com/chevp/chi) command-line tool.
 
-<img src="screenshots/home.png" alt="che-board home" width="50%" />
+<img src="screenshots/home.png" alt="Che Board home screen" width="60%" />
 
-## What it is
+## What is it?
 
-`che-board` gives the `chi` CLI a graphical surface, faithful to chi's `ux-console` prototype:
+Che Board puts a clean graphical interface on top of `chi`, so you can run the things you'd normally type into a terminal — checking status, running diagnostics, browsing help — by clicking a button instead.
 
-- **Workspace · Chat** — primary view with model picker (placeholder), feed, composer.
-- **Tools** — sidebar buttons that run a chi command and inject its output into the feed as a `msg-tool` bubble. v0 ships **status**, **doctor**, **help**.
-- **Settings** — sectioned form over `~/.chi/config` (Anthropic, LLM gateway, Ollama, misc).
+- **Chat workspace** — your primary view, where command output appears as messages in a familiar conversation layout.
+- **Tools sidebar** — one click to run common chi commands. Today you get **Status**, **Doctor**, and **Help**.
+- **Settings** — a simple form for editing your chi configuration (`~/.chi/config`) without opening a text editor.
 
-## How it links to chi
+## Download
 
-`chi` is consumed as a library, not by shelling out to the binary:
+Pre-built installers for **macOS** and **Windows** are published on the [Releases page](https://github.com/chevp/che-board/releases).
 
-```
-che-board/electron/chi-bridge.ts
-  └─ require.resolve("chi/dist/commands/<tool>.js")
-     └─ dynamic import + stdout capture
-```
+Pick the file that matches your machine:
+- macOS — `.dmg`
+- Windows — `.exe` installer
 
-`chi` is declared as a `github:chevp/chi` dependency. chi commits its compiled `dist/` to git, so `npm install` pulls a ready-to-import package — no separate build step against the sibling repo is needed.
+> macOS users: the app isn't code-signed yet, so on first launch you may need to right-click the app and choose **Open** to bypass Gatekeeper.
 
-> Note: `chi` doesn't (yet) export a JS API — its commands write directly to `process.stdout`. The bridge patches `process.stdout.write` for the duration of each call and restores it afterwards. This shim goes away once `chi` exposes structured command outputs.
+## Getting started
 
-## Stack
+1. Install Che Board from the [Releases page](https://github.com/chevp/che-board/releases).
+2. Launch it.
+3. Open **Settings** and fill in your chi credentials (the same ones you'd put in `~/.chi/config`).
+4. Head to **Workspace · Chat** and click any tool in the left sidebar to try it.
 
-- **Electron** 33 (main process in TypeScript, CommonJS output)
-- **Angular** 19 (standalone components, hash-routed)
-- **TypeScript** strict mode
-- **SCSS** with chi's `ux-console` design tokens (tan accent, `#d2a878`)
-- No state-management library; signals only.
+That's it — no terminal required.
 
-## Running locally
+## Building from source
+
+If you want to run the development version or hack on the app yourself:
 
 ```sh
 npm install
 npm run dev
 ```
 
-`npm run dev` runs three things in parallel:
-- `ng serve` on `:4200`
-- `tsc -p electron/tsconfig.json --watch`
-- a launcher script that waits for both, then `npx electron .`
+This starts the Angular dev server, watches the Electron code, and opens the app once everything is ready.
 
-For a production-style build:
+To produce a production build locally:
 
 ```sh
 npm run build
 npm start
 ```
 
+To package installers for your current platform:
+
+```sh
+npm run package        # detect platform
+npm run package:mac    # macOS only
+npm run package:win    # Windows only
+```
+
+Output lands in `release/`.
+
+## Requirements
+
+- **Node.js 20+** (only needed if you're building from source)
+- A working internet connection for the LLM features that `chi` uses
+
+## Contributing
+
+Bug reports and pull requests are welcome on [GitHub](https://github.com/chevp/che-board). For changes that touch the underlying CLI, see the [`chi`](https://github.com/chevp/chi) repository.
+
 ## License
 
-[Apache-2.0](LICENSE)
+Released under the [Apache 2.0 license](LICENSE).
