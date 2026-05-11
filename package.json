@@ -1,6 +1,6 @@
 {
   "name": "che-board",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "description": "Desktop wrapper for the chi CLI's served web console.",
   "private": true,
   "main": "dist-electron/main.js",

@@ -25,26 +25,33 @@ permissions:
   contents: write
 
 jobs:
+  plan:
+    name: Plan build matrix
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.compute.outputs.matrix }}
+    steps:
+      - id: compute
+        shell: bash
+        env:
+          PLATFORMS: ${{ github.event_name == 'workflow_dispatch' && inputs.platforms || 'both' }}
+        run: |
+          mac='{"os":"macos-latest","target":"mac","label":"macOS installer (.dmg / .zip)","flag":"--mac"}'
+          win='{"os":"windows-latest","target":"win","label":"Windows installer (.exe)","flag":"--win"}'
+          case "$PLATFORMS" in
+            mac) matrix="[$mac]" ;;
+            win) matrix="[$win]" ;;
+            *)   matrix="[$mac,$win]" ;;
+          esac
+          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+
   package:
     name: ${{ matrix.label }}
-    if: >-
-      github.event_name != 'workflow_dispatch'
-      || inputs.platforms == 'both'
-      || inputs.platforms == matrix.target
-
+    needs: plan
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - os: macos-latest
-            target: mac
-            label: macOS installer (.dmg / .zip)
-            flag: --mac
-          - os: windows-latest
-            target: win
-            label: Windows installer (.exe)
-            flag: --win
-
+        include: ${{ fromJSON(needs.plan.outputs.matrix) }}
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -69,7 +76,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # Skip macOS code-signing — no Developer ID configured for CI.
           CSC_IDENTITY_AUTO_DISCOVERY: "false"
-          SHOULD_PUBLISH: ${{ github.ref_type == 'tag' || inputs.publish == true }}
+          SHOULD_PUBLISH: ${{ github.ref_type == 'tag' || inputs.publish }}
         run: |
           if [ "$SHOULD_PUBLISH" = "true" ]; then
             npx electron-builder ${{ matrix.flag }} --publish always
@@ -78,7 +85,7 @@ jobs:
           fi
 
       - name: Upload installer as workflow artifact
-        if: github.ref_type != 'tag' && (github.event_name != 'workflow_dispatch' || inputs.publish != true)
+        if: github.ref_type != 'tag' && !inputs.publish
         uses: actions/upload-artifact@v5
         with:
           name: che-board-${{ matrix.target }}
