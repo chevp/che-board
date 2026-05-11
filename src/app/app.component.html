@@ -1,0 +1,39 @@
+<aside class="sidebar" [class.collapsed]="sidebarCollapsed()">
+  <div class="sidebar-brand">
+    <span class="brand-logo">χ</span>
+    <span class="brand-name">chi <small>· board</small></span>
+    <button class="icon-btn brand-collapse" type="button" title="Toggle sidebar" (click)="toggleSidebar()">
+      <i class="fa-solid fa-bars-staggered" aria-hidden="true"></i>
+    </button>
+  </div>
+
+  <nav class="sidebar-scroll">
+    <div class="nav-section">
+      <div class="nav-label">Workspaces</div>
+      <a class="nav-item ws-item" routerLink="/status" routerLinkActive="active">
+        <i class="fa-solid fa-gauge-high" aria-hidden="true"></i>
+        <span>Status</span>
+      </a>
+      <a class="nav-item ws-item" routerLink="/settings" routerLinkActive="active">
+        <i class="fa-solid fa-sliders" aria-hidden="true"></i>
+        <span>Settings</span>
+      </a>
+    </div>
+  </nav>
+
+  <div class="sidebar-bottom">
+    <div class="conn-status">
+      <span class="dot dot-ok"></span>
+      <span>chi linked</span>
+      <span class="version-text">v0.1.0</span>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+  <button class="icon-btn floating-open" type="button" title="Open sidebar"
+          *ngIf="sidebarCollapsed()" (click)="toggleSidebar()">
+    <i class="fa-solid fa-bars" aria-hidden="true"></i>
+  </button>
+  <router-outlet />
+</main>

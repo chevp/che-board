@@ -1,0 +1,48 @@
+{
+  "name": "chi-board",
+  "version": "0.1.0",
+  "description": "Desktop console for the chi CLI — Electron + Angular GUI, MongoDB-Compass style.",
+  "private": true,
+  "main": "dist-electron/main.js",
+  "homepage": "https://github.com/chevp/chi-board",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/chevp/chi-board.git"
+  },
+  "license": "Apache-2.0",
+  "author": "chevp",
+  "scripts": {
+    "build:renderer": "ng build",
+    "build:electron": "tsc -p electron/tsconfig.json",
+    "build": "npm run build:renderer && npm run build:electron",
+    "start": "electron .",
+    "dev:renderer": "ng serve --port 4200",
+    "dev:electron": "tsc -p electron/tsconfig.json --watch",
+    "dev": "concurrently -k -n ng,tsc,electron -c blue,magenta,cyan \"npm:dev:renderer\" \"npm:dev:electron\" \"node scripts/wait-and-launch.mjs\"",
+    "typecheck": "tsc -p electron/tsconfig.json --noEmit && ng build --configuration=development --output-path=.tmp-typecheck && rm -rf .tmp-typecheck"
+  },
+  "dependencies": {
+    "@angular/common": "^19.0.0",
+    "@angular/compiler": "^19.0.0",
+    "@angular/core": "^19.0.0",
+    "@angular/forms": "^19.0.0",
+    "@angular/platform-browser": "^19.0.0",
+    "@angular/router": "^19.0.0",
+    "chi": "file:../../tools/chi",
+    "rxjs": "^7.8.1",
+    "tslib": "^2.8.0",
+    "zone.js": "^0.15.0"
+  },
+  "devDependencies": {
+    "@angular-devkit/build-angular": "^19.0.0",
+    "@angular/cli": "^19.0.0",
+    "@angular/compiler-cli": "^19.0.0",
+    "@types/node": "^22.10.0",
+    "concurrently": "^9.1.0",
+    "electron": "^33.0.0",
+    "typescript": "~5.6.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

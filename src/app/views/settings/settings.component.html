@@ -1,0 +1,41 @@
+<header class="topbar">
+  <div class="topbar-left">
+    <span class="view-title"><i class="fa-solid fa-sliders"></i> Settings</span>
+    <span class="topbar-eyebrow">~/.chi/config</span>
+  </div>
+  <div class="topbar-right">
+    <button class="icon-btn" type="button" title="Reveal secrets" (click)="toggleReveal()">
+      <i class="fa-solid" [class.fa-eye]="!revealSecrets()" [class.fa-eye-slash]="revealSecrets()"></i>
+    </button>
+    <button class="primary-sm" type="button" [disabled]="saving()" (click)="save()">
+      <i class="fa-solid fa-floppy-disk"></i>
+      <span>{{ saving() ? "Saving…" : "Save" }}</span>
+    </button>
+  </div>
+</header>
+
+<section class="view-body">
+  <div class="meta">
+    <span><i class="fa-solid fa-file-lines"></i> {{ configPath() }}</span>
+    <span class="dot-sep">·</span>
+    <span>chi {{ chiVersion() || "—" }}</span>
+    <span class="dot-sep" *ngIf="savedAt() as ts">·</span>
+    <span *ngIf="savedAt() as ts" class="saved">saved</span>
+  </div>
+
+  <div class="section" *ngFor="let section of sections">
+    <h3>{{ section.title }}</h3>
+    <div class="grid">
+      <div class="field" *ngFor="let f of section.fields">
+        <label [attr.for]="f.key">{{ f.label }}</label>
+        <input
+          [id]="f.key"
+          [type]="f.secret && !revealSecrets() ? 'password' : 'text'"
+          [placeholder]="f.placeholder || ''"
+          [ngModel]="values()[f.key] || ''"
+          (ngModelChange)="update(f.key, $event)" />
+        <span class="hint" *ngIf="f.hint">{{ f.hint }}</span>
+      </div>
+    </div>
+  </div>
+</section>

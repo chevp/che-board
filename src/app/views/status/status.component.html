@@ -1,0 +1,44 @@
+<header class="topbar">
+  <div class="topbar-left">
+    <span class="view-title"><i class="fa-solid fa-gauge-high"></i> Status</span>
+    <span class="topbar-eyebrow">chi status</span>
+  </div>
+  <div class="topbar-right">
+    <button class="icon-btn" type="button" title="Pick a repository" (click)="pickRepo()">
+      <i class="fa-solid fa-folder-open"></i>
+    </button>
+    <button class="icon-btn" type="button" title="Re-run"
+            [disabled]="!repoPath() || running()" (click)="runStatus()">
+      <i class="fa-solid fa-arrows-rotate" [class.fa-spin]="running()"></i>
+    </button>
+  </div>
+</header>
+
+<section class="view-body">
+  <div class="repo-card" *ngIf="repoPath() as repo; else empty">
+    <div class="repo-card-row">
+      <span class="repo-label">Repository</span>
+      <code class="repo-path">{{ repo }}</code>
+    </div>
+    <div class="repo-card-row" *ngIf="code() !== null">
+      <span class="repo-label">Exit</span>
+      <span class="exit-pill" [class.ok]="code() === 0" [class.err]="code() !== 0">
+        {{ code() }}
+      </span>
+      <span class="repo-label timing" *ngIf="lastRunMs() !== null">{{ lastRunMs() }} ms</span>
+    </div>
+  </div>
+
+  <ng-template #empty>
+    <div class="empty">
+      <i class="fa-solid fa-folder-open empty-icon"></i>
+      <h2>Pick a repository to begin</h2>
+      <p>chi-board will run <code>chi status</code> against the repo you select and stream the output here.</p>
+      <button class="primary" type="button" (click)="pickRepo()">
+        <i class="fa-solid fa-folder-open"></i> Choose repository
+      </button>
+    </div>
+  </ng-template>
+
+  <pre class="output" *ngIf="stdout() || stderr()"><code><span class="stream-stdout">{{ stdout() }}</span><span class="stream-stderr" *ngIf="stderr()">{{ stderr() }}</span></code></pre>
+</section>

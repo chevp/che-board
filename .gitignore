@@ -1,0 +1,13 @@
+node_modules/
+dist/
+dist-electron/
+.angular/
+.tmp-typecheck/
+out/
+.DS_Store
+.env
+.env.local
+*.log
+npm-debug.log*
+.idea/
+.vscode/
