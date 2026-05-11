@@ -2,51 +2,40 @@
 
 ## What this project is
 
-`che-board` is an Electron + Angular desktop GUI for the [`chi`](https://github.com/chevp/chi) CLI. Modeled directly on chi's `context/prototypes/ux-console` (chat-shell + Tools sidebar).
-
-Status: v0 scaffold. Chat view (placeholder chat backend) hosts tool output. Tools wired: status, doctor, help. Settings view for `~/.chi/config`.
+`che-board` is a thin Electron shell around the [`chi`](https://github.com/chevp/chi) CLI's web console (`chi serve`). The Electron main process starts chi's server in-process, then loads its URL in a single `BrowserWindow`. There is no separate renderer code — the UI you see is whatever `chi serve` ships.
 
 ## Architecture
 
-- **Electron main** (`electron/`, CommonJS TS) hosts the window and an IPC bridge. The bridge does not shell out — it imports `chi/dist/commands/*.js` via `require.resolve` + dynamic `import()` and patches `process.stdout` for the duration of each call.
-- **Angular renderer** (`src/`, standalone components, hash router) is locked behind `contextIsolation: true`. The only surface the renderer sees is `window.cheBoard` (declared in [electron/preload.ts](electron/preload.ts) and typed in [src/app/shared/chi-ipc.service.ts](src/app/shared/chi-ipc.service.ts)).
-- **chi is a file: dep** (`../../tools/chi`). Build chi before che-board — the bridge resolves the compiled `dist/` output.
+- **[electron/main.ts](electron/main.ts)** — creates the `BrowserWindow`, starts `chi serve`, points the window at its URL. Also installs a `setWindowOpenHandler` that keeps same-origin clicks in the current window and routes external links to the OS browser. (Chi's UI calls `window.open()` for tool output; without the handler each click spawns a new Electron window.)
+- **[electron/chi-serve.ts](electron/chi-serve.ts)** — imports `chi/dist/commands/serve.js` via `require.resolve` + dynamic `import()` and runs it on a free port. The server lives until the Electron process exits.
+- **No preload, no IPC bridge.** Chi's served UI doesn't know about `window.cheBoard`, so the bridge was deleted. If you ever need to expose Electron-specific features to the UI, that's where it goes back in — and chi's UI would need code to call into it.
 
 ## Conventions
 
-- **TypeScript strict.** No `any` without a justification comment.
-- **No state-management library.** Use Angular signals.
-- **Design tokens come from [src/styles.scss](src/styles.scss).** Don't hardcode colours in component SCSS — always reach for the CSS variables there.
-- **Mirror chi's `ux-console` geometry** (sidebar widths, topbar heights, radius scale, tan accent). The two surfaces should be visually indistinguishable when stood side-by-side.
-- **No new runtime deps without justification.** Angular, Electron, RxJS, zone.js, tslib, and chi itself — that's the lock.
-
-## Adding a Tool
-
-Tools are chi commands surfaced as sidebar buttons. To add one:
-
-1. Extend the `ToolName` union in [electron/chi-bridge.ts](electron/chi-bridge.ts) and [src/app/shared/chi-ipc.service.ts](src/app/shared/chi-ipc.service.ts).
-2. Add a sidebar entry in [src/app/app.component.html](src/app/app.component.html) under the `nav-section` with `nav-label = "Tools"`.
-3. The chat view's `runTool` handler reads the tool name and dispatches via `ChiIpcService.runTool`.
-
-## Adding a Workspace view
-
-1. New folder under `src/app/views/<name>/`, standalone component.
-2. Add a route in [src/app/app.routes.ts](src/app/app.routes.ts) (`loadComponent`).
-3. Add a nav entry in [src/app/app.component.html](src/app/app.component.html) under the `nav-section` with `nav-label = "Workspace"`.
+- **TypeScript strict**, CommonJS output for the Electron main process (see [electron/tsconfig.json](electron/tsconfig.json)).
+- **No `any`** without a justification comment.
+- **No new runtime deps without justification.** The lock is: `electron`, `chi`. Everything else is dev-only.
 
 ## Build & dev
 
 ```sh
 npm install
-npm run dev      # ng serve + tsc --watch + electron launcher
-npm run build    # ng build (prod) + tsc electron
-npm start        # electron . against the built renderer
+npm run dev      # tsc --watch + electron launcher (waits for first compile)
+npm run build    # tsc -p electron/tsconfig.json
+npm start        # node scripts/launch.mjs
 ```
 
-Dev launcher: [scripts/wait-and-launch.mjs](scripts/wait-and-launch.mjs).
+Production installers (uses electron-builder, output to `release/`):
 
-## Known shims (to remove)
+```sh
+npm run package:mac
+npm run package:win
+```
 
-- **stdout hijack** in [chi-bridge.ts](electron/chi-bridge.ts). chi commands write to `process.stdout`; the bridge patches it per-call. Replace once chi exposes structured command results.
-- **`file:` dep on chi.** Works for local dev, but breaks anyone cloning che-board without chi alongside. Fix when chi is publishable.
-- **Chat backend is a placeholder.** The prototype is chat-centric; che-board ships the shell without a wired chat orchestrator. Composer is disabled; the feed only hosts Tools output for now.
+CI builds them on GitHub-hosted runners — see [.github/workflows/build.yml](.github/workflows/build.yml).
+
+## Known shims
+
+- **`setWindowOpenHandler` workaround** in [electron/main.ts](electron/main.ts) — chi's UI was written for a browser and uses `window.open`. Remove once chi's UI is Electron-aware (or once chi exposes a different rendering target).
+- **Dynamic-import trick** in [electron/chi-serve.ts](electron/chi-serve.ts) — TypeScript with `module: CommonJS` rewrites `await import(x)` into `require(x)`, which fails on chi's ESM build. The `new Function("s", "return import(s)")` indirection keeps it as a true runtime dynamic import.
+- **macOS Gatekeeper** — CI builds are unsigned. End users see a "damaged" dialog on Apple Silicon. Fix is either ad-hoc signing in `package.json`'s electron-builder `mac` block, or a real Developer ID + notarization step in the workflow.

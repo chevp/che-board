@@ -1,8 +1,5 @@
 node_modules/
-dist/
 dist-electron/
-.angular/
-.tmp-typecheck/
 out/
 release/
 .DS_Store

@@ -1,7 +1,7 @@
 {
   "name": "che-board",
-  "version": "0.1.9",
-  "description": "Desktop console for the chi CLI — Electron + Angular GUI, modeled on chi's ux-console prototype.",
+  "version": "0.1.10",
+  "description": "Desktop wrapper for the chi CLI's served web console.",
   "private": true,
   "main": "dist-electron/main.js",
   "homepage": "https://github.com/chevp/che-board",
@@ -12,34 +12,19 @@
   "license": "Apache-2.0",
   "author": "chevp",
   "scripts": {
-    "build:renderer": "ng build",
-    "build:electron": "tsc -p electron/tsconfig.json",
-    "build": "npm run build:renderer && npm run build:electron",
+    "build": "tsc -p electron/tsconfig.json",
     "package": "electron-builder",
     "package:mac": "electron-builder --mac --publish=never",
     "package:win": "electron-builder --win --publish=never",
     "start": "node scripts/launch.mjs",
-    "dev:renderer": "ng serve --port 4200",
     "dev:electron": "tsc -p electron/tsconfig.json --watch",
-    "dev": "concurrently -k -n ng,tsc,electron -c blue,magenta,cyan \"npm:dev:renderer\" \"npm:dev:electron\" \"node scripts/wait-and-launch.mjs\"",
-    "typecheck": "tsc -p electron/tsconfig.json --noEmit && ng build --configuration=development --output-path=.tmp-typecheck && rm -rf .tmp-typecheck"
+    "dev": "concurrently -k -n tsc,electron -c magenta,cyan \"npm:dev:electron\" \"node scripts/launch.mjs\"",
+    "typecheck": "tsc -p electron/tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@angular/common": "^21.0.0",
-    "@angular/compiler": "^21.0.0",
-    "@angular/core": "^21.0.0",
-    "@angular/forms": "^21.0.0",
-    "@angular/platform-browser": "^21.0.0",
-    "@angular/router": "^21.0.0",
-    "chi": "github:chevp/chi",
-    "rxjs": "^7.8.1",
-    "tslib": "^2.8.0",
-    "zone.js": "^0.15.0"
+    "chi": "github:chevp/chi"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "^21.2.10",
-    "@angular/cli": "^21.2.10",
-    "@angular/compiler-cli": "^21.0.0",
     "@types/node": "^22.10.0",
     "concurrently": "^9.1.0",
     "electron": "^42.0.1",
@@ -57,7 +42,6 @@
     },
     "files": [
       "dist-electron/**/*",
-      "dist/renderer/**/*",
       "package.json"
     ],
     "mac": {
@@ -88,6 +72,13 @@
           ]
         }
       ]
-    }
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "chevp",
+        "repo": "che-board"
+      }
+    ]
   }
 }

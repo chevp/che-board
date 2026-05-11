@@ -1,0 +1,91 @@
+name: Package Desktop App
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      platforms:
+        description: "Which platforms to build"
+        type: choice
+        options:
+          - both
+          - mac
+          - win
+        default: both
+      publish:
+        description: "Publish artifacts to a draft GitHub Release"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    name: ${{ matrix.label }}
+    if: >-
+      github.event_name != 'workflow_dispatch'
+      || inputs.platforms == 'both'
+      || inputs.platforms == matrix.target
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            target: mac
+            label: macOS installer (.dmg / .zip)
+            flag: --mac
+          - os: windows-latest
+            target: win
+            label: Windows installer (.exe)
+            flag: --win
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Compile Electron main
+        run: npm run build
+
+      - name: Build and (optionally) publish installer
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Skip macOS code-signing — no Developer ID configured for CI.
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+          SHOULD_PUBLISH: ${{ github.ref_type == 'tag' || inputs.publish == true }}
+        run: |
+          if [ "$SHOULD_PUBLISH" = "true" ]; then
+            npx electron-builder ${{ matrix.flag }} --publish always
+          else
+            npx electron-builder ${{ matrix.flag }} --publish never
+          fi
+
+      - name: Upload installer as workflow artifact
+        if: github.ref_type != 'tag' && (github.event_name != 'workflow_dispatch' || inputs.publish != true)
+        uses: actions/upload-artifact@v5
+        with:
+          name: che-board-${{ matrix.target }}
+          path: |
+            release/*.dmg
+            release/*.zip
+            release/*.exe
+            release/*.msi
+          if-no-files-found: warn
+          retention-days: 14

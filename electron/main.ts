@@ -1,9 +1,5 @@
-import { app, BrowserWindow, ipcMain, dialog } from "electron";
-import * as path from "node:path";
-import { registerChiIpc } from "./chi-bridge";
+import { app, BrowserWindow, shell } from "electron";
 import { startChiServer } from "./chi-serve";
-
-const DEV_OVERRIDE_URL = process.env["CHE_BOARD_DEV_URL"];
 
 function createWindow(targetUrl: string): BrowserWindow {
   const win = new BrowserWindow({
@@ -14,36 +10,39 @@ function createWindow(targetUrl: string): BrowserWindow {
     backgroundColor: "#212121",
     title: "che-board",
     webPreferences: {
-      preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
       nodeIntegration: false,
-      sandbox: false,
     },
   });
 
-  win.loadURL(targetUrl);
-  if (DEV_OVERRIDE_URL) {
-    win.webContents.openDevTools({ mode: "detach" });
-  }
+  // Chi's served UI calls window.open() for tool output, which Electron
+  // otherwise materialises as a new BrowserWindow per click. Keep same-origin
+  // navigation inside the current window; punt anything external to the OS
+  // browser.
+  win.webContents.setWindowOpenHandler(({ url }) => {
+    try {
+      const sameOrigin = new URL(url).origin === new URL(targetUrl).origin;
+      if (sameOrigin) {
+        win.webContents.loadURL(url);
+      } else {
+        void shell.openExternal(url);
+      }
+    } catch {
+      /* ignore malformed urls */
+    }
+    return { action: "deny" };
+  });
 
+  win.loadURL(targetUrl);
   return win;
 }
 
 app.whenReady().then(async () => {
-  registerChiIpc(ipcMain, dialog);
-
-  let targetUrl: string;
-  if (DEV_OVERRIDE_URL) {
-    targetUrl = DEV_OVERRIDE_URL;
-  } else {
-    const server = await startChiServer();
-    targetUrl = server.url;
-  }
-
-  createWindow(targetUrl);
+  const server = await startChiServer();
+  createWindow(server.url);
 
   app.on("activate", () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow(targetUrl);
+    if (BrowserWindow.getAllWindows().length === 0) createWindow(server.url);
   });
 });
 
