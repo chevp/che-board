@@ -22,7 +22,7 @@ function createWindow(targetUrl: string): BrowserWindow {
   });
 
   win.loadURL(targetUrl);
-  if (DEV_OVERRIDE_URL || !app.isPackaged) {
+  if (DEV_OVERRIDE_URL) {
     win.webContents.openDevTools({ mode: "detach" });
   }
 

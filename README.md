@@ -4,6 +4,8 @@ Desktop console for the [`chi`](https://github.com/chevp/chi) CLI — an Electro
 
 > Status: **v0 scaffold.** Chat-shell + Tools sidebar (status / doctor / help) wired against a live `chi` library import. Settings view for `~/.chi/config`. Chat backend not yet wired — the chat surface is a host for tool output.
 
+<img src="screenshots/home.png" alt="che-board home" width="50%" />
+
 ## What it is
 
 `che-board` gives the `chi` CLI a graphical surface, faithful to chi's `ux-console` prototype:
@@ -57,49 +59,6 @@ For a production-style build:
 npm run build
 npm start
 ```
-
-## Layout
-
-```
-che-board/
-├── electron/                 # Electron main process (CJS)
-│   ├── main.ts               # window creation, dev-server URL
-│   ├── preload.ts            # contextBridge — exposes window.cheBoard
-│   └── chi-bridge.ts         # chi library imports + stdout capture
-├── src/                      # Angular renderer
-│   ├── styles.scss           # chi ux-console design tokens (tan accent)
-│   ├── index.html
-│   ├── main.ts               # bootstrapApplication
-│   └── app/
-│       ├── app.component.*   # chat-shell + Tools sidebar
-│       ├── shared/chi-ipc.service.ts
-│       └── views/
-│           ├── chat/         # primary view — feed + composer + tool bubbles
-│           └── settings/
-├── scripts/wait-and-launch.mjs
-└── angular.json | tsconfig.json | package.json
-```
-
-## Design system
-
-The palette and component patterns come directly from [chi/context/prototypes/ux-console](https://github.com/chevp/chi/tree/main/context/prototypes/ux-console):
-
-| Token | Value |
-|-------|-------|
-| canvas | `#212121` |
-| sidebar | `#181818` |
-| accent | `#d2a878` (tan) |
-| accent-text | `#14171c` |
-| mono | JetBrains Mono |
-| sans | DM Sans |
-
-## Roadmap
-
-- [ ] Wire chat to a chi orchestrator endpoint (currently a placeholder)
-- [ ] **Commit** tool — staged diff + AI-generated message preview
-- [ ] **Console** — free-form `chi <cmd>` runner
-- [ ] **Workflows** — list & run `.che/workflows/*.yml`
-- [ ] **Issues** — list / create / triage
 
 ## License
 
