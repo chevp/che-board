@@ -1,4 +1,4 @@
-import { app, BrowserWindow, shell } from "electron";
+import { app, BrowserWindow, shell, Menu } from "electron";
 import { startChiServer } from "./chi-serve";
 
 function createWindow(targetUrl: string): BrowserWindow {
@@ -37,7 +37,30 @@ function createWindow(targetUrl: string): BrowserWindow {
   return win;
 }
 
+function installAppMenu(): void {
+  // Keep DevTools reachable in packaged builds — without it, chi UI errors
+  // are invisible. F12 / Cmd+Alt+I toggles, Cmd+Alt+R reloads.
+  const template: Electron.MenuItemConstructorOptions[] = [
+    ...(process.platform === "darwin"
+      ? ([{ role: "appMenu" }] as Electron.MenuItemConstructorOptions[])
+      : []),
+    { role: "editMenu" },
+    {
+      label: "View",
+      submenu: [
+        { role: "reload", accelerator: process.platform === "darwin" ? "Cmd+Alt+R" : "Ctrl+Alt+R" },
+        { role: "toggleDevTools", accelerator: process.platform === "darwin" ? "Cmd+Alt+I" : "F12" },
+        { type: "separator" },
+        { role: "togglefullscreen" },
+      ],
+    },
+    { role: "windowMenu" },
+  ];
+  Menu.setApplicationMenu(Menu.buildFromTemplate(template));
+}
+
 app.whenReady().then(async () => {
+  installAppMenu();
   const server = await startChiServer();
   createWindow(server.url);
 
