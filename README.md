@@ -2,8 +2,6 @@
 
 Desktop console for the [`chi`](https://github.com/chevp/chi) CLI — an Electron + Angular GUI modeled on chi's own `context/prototypes/ux-console`.
 
-> Status: **v0 scaffold.** Chat-shell + Tools sidebar (status / doctor / help) wired against a live `chi` library import. Settings view for `~/.chi/config`. Chat backend not yet wired — the chat surface is a host for tool output.
-
 <img src="screenshots/home.png" alt="che-board home" width="50%" />
 
 ## What it is
