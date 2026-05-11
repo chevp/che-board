@@ -2,8 +2,8 @@ import { app, BrowserWindow, ipcMain, dialog } from "electron";
 import * as path from "node:path";
 import { registerChiIpc } from "./chi-bridge";
 
-const DEV_SERVER_URL = process.env["CHE_BOARD_DEV_URL"] ?? "http://localhost:4200";
-const isDev = !app.isPackaged;
+const DEV_SERVER_URL = process.env["CHE_BOARD_DEV_URL"];
+const isDev = !!DEV_SERVER_URL;
 
 function createWindow(): BrowserWindow {
   const win = new BrowserWindow({
@@ -22,7 +22,7 @@ function createWindow(): BrowserWindow {
   });
 
   if (isDev) {
-    win.loadURL(DEV_SERVER_URL);
+    win.loadURL(DEV_SERVER_URL!);
     win.webContents.openDevTools({ mode: "detach" });
   } else {
     win.loadFile(path.join(__dirname, "..", "dist", "renderer", "browser", "index.html"));
