@@ -45,9 +45,13 @@ async function waitForReady(url: string, timeoutMs = 10_000): Promise<void> {
   );
 }
 
+// TypeScript with module:CommonJS rewrites `await import(x)` to require(x),
+// which fails on chi's ESM build. Keep this as a true runtime dynamic import.
+const dynamicImport = new Function("s", "return import(s)") as (s: string) => Promise<unknown>;
+
 async function importChiServe(): Promise<{ run: (argv: string[]) => Promise<number> }> {
   const url = require.resolve("chi/dist/commands/serve.js");
-  return await import(url);
+  return (await dynamicImport(url)) as { run: (argv: string[]) => Promise<number> };
 }
 
 export async function startChiServer(host = "127.0.0.1"): Promise<ChiServer> {

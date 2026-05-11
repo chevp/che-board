@@ -55,9 +55,13 @@ function writeConfigFile(values: Record<string, string>): void {
   fs.writeFileSync(CHI_CONFIG_FILE, lines.join("\n") + "\n", "utf8");
 }
 
+// TypeScript with module:CommonJS rewrites `await import(x)` to require(x),
+// which fails on chi's ESM build. Keep this as a true runtime dynamic import.
+const dynamicImport = new Function("s", "return import(s)") as (s: string) => Promise<unknown>;
+
 async function importChiCommand(name: string): Promise<{ run: (argv: string[]) => Promise<number> }> {
   const url = require.resolve(`chi/dist/commands/${name}.js`);
-  return await import(url);
+  return (await dynamicImport(url)) as { run: (argv: string[]) => Promise<number> };
 }
 
 interface CaptureResult {
