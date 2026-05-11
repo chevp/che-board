@@ -6,9 +6,11 @@ export interface RunResult {
   code: number;
 }
 
-interface ChiBoardApi {
+export type ToolName = "status" | "doctor" | "help";
+
+interface CheBoardApi {
   pickRepo(): Promise<string | null>;
-  runStatus(repoPath: string): Promise<RunResult>;
+  runTool(name: ToolName, repoPath: string): Promise<RunResult>;
   readConfig(): Promise<Record<string, string>>;
   writeConfig(values: Record<string, string>): Promise<void>;
   configPath(): Promise<string>;
@@ -17,21 +19,21 @@ interface ChiBoardApi {
 
 declare global {
   interface Window {
-    chiBoard?: ChiBoardApi;
+    cheBoard?: CheBoardApi;
   }
 }
 
-function api(): ChiBoardApi {
-  if (!window.chiBoard) {
-    throw new Error("chiBoard IPC bridge is not available. Are you running outside Electron?");
+function api(): CheBoardApi {
+  if (!window.cheBoard) {
+    throw new Error("cheBoard IPC bridge is not available. Are you running outside Electron?");
   }
-  return window.chiBoard;
+  return window.cheBoard;
 }
 
 @Injectable({ providedIn: "root" })
 export class ChiIpcService {
   pickRepo(): Promise<string | null> { return api().pickRepo(); }
-  runStatus(repoPath: string): Promise<RunResult> { return api().runStatus(repoPath); }
+  runTool(name: ToolName, repoPath: string): Promise<RunResult> { return api().runTool(name, repoPath); }
   readConfig(): Promise<Record<string, string>> { return api().readConfig(); }
   writeConfig(values: Record<string, string>): Promise<void> { return api().writeConfig(values); }
   configPath(): Promise<string> { return api().configPath(); }

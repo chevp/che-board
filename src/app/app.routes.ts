@@ -1,10 +1,10 @@
 import { Routes } from "@angular/router";
 
 export const routes: Routes = [
-  { path: "", pathMatch: "full", redirectTo: "status" },
+  { path: "", pathMatch: "full", redirectTo: "chat" },
   {
-    path: "status",
-    loadComponent: () => import("./views/status/status.component").then((m) => m.StatusComponent),
+    path: "chat",
+    loadComponent: () => import("./views/chat/chat.component").then((m) => m.ChatComponent),
   },
   {
     path: "settings",

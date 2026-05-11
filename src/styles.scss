@@ -1,27 +1,27 @@
 /* ==========================================================
-   chi-board — design tokens
-   Adapted from cura-console (UXIP-003). Dark canvas with a
-   cooler blue-violet accent to distinguish chi-board from the
-   tan/wood Cura palette.
+   che-board — design tokens
+   Copied directly from chi's context/prototypes/ux-console.
+   Dark canvas + tan accent. Same palette as the prototype so
+   che-board and chi's CLI surface stay visually congruent.
    ========================================================== */
 :root {
-  --bg-canvas: #1a1b1f;
-  --bg-sidebar: #131418;
-  --bg-elevated: #25262c;
+  --bg-canvas: #212121;
+  --bg-sidebar: #181818;
+  --bg-elevated: #2f2f2f;
   --bg-hover: rgba(255, 255, 255, 0.06);
-  --bg-active: rgba(120, 160, 240, 0.18);
-  --bubble: #2a2b32;
+  --bg-active: rgba(210, 168, 120, 0.18);
+  --bubble-user: #303030;
   --border: rgba(255, 255, 255, 0.10);
-  --border-strong: rgba(120, 160, 240, 0.4);
+  --border-strong: rgba(210, 168, 120, 0.4);
   --text: #ececec;
   --text-secondary: #c9ccd1;
-  --text-muted: #8a8e95;
+  --text-muted: #8e8e8e;
 
-  --accent: #78a0f0;
-  --accent-strong: #5b82d3;
-  --accent-soft: #c5d6f5;
-  --accent-bg: rgba(120, 160, 240, 0.16);
-  --accent-text: #0f1116;
+  --accent: #d2a878;
+  --accent-strong: #a0703a;
+  --accent-soft: #e8d5bf;
+  --accent-bg: rgba(210, 168, 120, 0.16);
+  --accent-text: #14171c;
 
   --green: #4ade80;
   --orange: #fb923c;
@@ -55,7 +55,7 @@ a { color: var(--accent); text-decoration: none; }
 a:hover { text-decoration: underline; }
 
 /* ==========================================================
-   Scrollbars — match cura-console
+   Scrollbars
    ========================================================== */
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -66,12 +66,12 @@ a:hover { text-decoration: underline; }
   background-clip: padding-box;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(120, 160, 240, 0.3);
+  background: rgba(210, 168, 120, 0.3);
   background-clip: padding-box;
 }
 
 /* ==========================================================
-   Shared atoms
+   Atoms — copied from prototype
    ========================================================== */
 .icon-btn {
   width: 32px;
@@ -99,17 +99,6 @@ a:hover { text-decoration: underline; }
 }
 .topbar-left, .topbar-right { display: flex; align-items: center; gap: 6px; }
 
-.view-title {
-  font-weight: 600;
-  font-size: 14px;
-  color: var(--text);
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 10px;
-}
-.view-title i { color: var(--accent); font-size: 13px; }
-
 .topbar-eyebrow {
   font-family: var(--mono);
   font-size: 10px;
@@ -122,8 +111,43 @@ a:hover { text-decoration: underline; }
   text-transform: uppercase;
 }
 
+.model-picker {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  transition: background 0.12s;
+  border: 1px solid transparent;
+}
+.model-picker:hover { background: var(--bg-hover); border-color: var(--border); }
+.model-picker select {
+  appearance: none;
+  background: transparent;
+  color: var(--text);
+  border: none;
+  outline: none;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  padding-right: 22px;
+  cursor: pointer;
+}
+.model-picker select option { background: var(--bg-elevated); color: var(--text); }
+.model-picker i {
+  position: absolute; right: 8px;
+  pointer-events: none;
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
 .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; display: inline-block; }
 .dot-idle { background: var(--text-muted); }
 .dot-ok { background: var(--green); box-shadow: 0 0 6px var(--green); }
 .dot-warn { background: var(--orange); box-shadow: 0 0 6px var(--orange); }
 .dot-err { background: var(--red); box-shadow: 0 0 6px var(--red); }
+.dot-busy { background: var(--accent); animation: pulse 1.4s ease-in-out infinite; }
+
+@keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+
+.dot-sep { color: var(--border-strong); }

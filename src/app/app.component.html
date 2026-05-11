@@ -1,7 +1,7 @@
 <aside class="sidebar" [class.collapsed]="sidebarCollapsed()">
   <div class="sidebar-brand">
     <span class="brand-logo">χ</span>
-    <span class="brand-name">chi <small>· board</small></span>
+    <span class="brand-name">che <small>· board</small></span>
     <button class="icon-btn brand-collapse" type="button" title="Toggle sidebar" (click)="toggleSidebar()">
       <i class="fa-solid fa-bars-staggered" aria-hidden="true"></i>
     </button>
@@ -9,15 +9,50 @@
 
   <nav class="sidebar-scroll">
     <div class="nav-section">
-      <div class="nav-label">Workspaces</div>
-      <a class="nav-item ws-item" routerLink="/status" routerLinkActive="active">
-        <i class="fa-solid fa-gauge-high" aria-hidden="true"></i>
-        <span>Status</span>
+      <div class="nav-label">Workspace</div>
+      <a class="nav-item ws-item" routerLink="/chat" routerLinkActive="active">
+        <i class="fa-regular fa-comment" aria-hidden="true"></i>
+        <span>Chat</span>
       </a>
       <a class="nav-item ws-item" routerLink="/settings" routerLinkActive="active">
         <i class="fa-solid fa-sliders" aria-hidden="true"></i>
         <span>Settings</span>
       </a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label nav-label-row">
+        <span>Repository</span>
+        <button class="nav-label-btn" type="button" title="Pick a repository" (click)="pickRepo()">
+          <i class="fa-solid fa-folder-open" aria-hidden="true"></i>
+        </button>
+      </div>
+      <div class="repo-row" *ngIf="ws.repoPath() as repo; else noRepo">
+        <i class="fa-solid fa-code-branch" aria-hidden="true"></i>
+        <span class="repo-name" [title]="repo">{{ repoBasename(repo) }}</span>
+      </div>
+      <ng-template #noRepo>
+        <button class="nav-item subtle" type="button" (click)="pickRepo()">
+          <i class="fa-solid fa-folder-plus" aria-hidden="true"></i>
+          <span>Choose repository…</span>
+        </button>
+      </ng-template>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">Tools</div>
+      <button class="nav-item tool-item" type="button" (click)="triggerTool('status')">
+        <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+        <span>chi status</span>
+      </button>
+      <button class="nav-item tool-item" type="button" (click)="triggerTool('doctor')">
+        <i class="fa-solid fa-stethoscope" aria-hidden="true"></i>
+        <span>chi doctor</span>
+      </button>
+      <button class="nav-item tool-item" type="button" (click)="triggerTool('help')">
+        <i class="fa-solid fa-circle-question" aria-hidden="true"></i>
+        <span>chi help</span>
+      </button>
     </div>
   </nav>
 
@@ -25,7 +60,7 @@
     <div class="conn-status">
       <span class="dot dot-ok"></span>
       <span>chi linked</span>
-      <span class="version-text">v0.1.0</span>
+      <span class="version-text">v{{ chiVersion() || "?" }}</span>
     </div>
   </div>
 </aside>

@@ -2,7 +2,7 @@ import { app, BrowserWindow, ipcMain, dialog } from "electron";
 import * as path from "node:path";
 import { registerChiIpc } from "./chi-bridge";
 
-const DEV_SERVER_URL = process.env["CHI_BOARD_DEV_URL"] ?? "http://localhost:4200";
+const DEV_SERVER_URL = process.env["CHE_BOARD_DEV_URL"] ?? "http://localhost:4200";
 const isDev = !app.isPackaged;
 
 function createWindow(): BrowserWindow {
@@ -12,7 +12,7 @@ function createWindow(): BrowserWindow {
     minWidth: 960,
     minHeight: 600,
     backgroundColor: "#212121",
-    title: "chi-board",
+    title: "che-board",
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,

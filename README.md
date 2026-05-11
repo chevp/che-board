@@ -1,47 +1,46 @@
-# chi-board
+# che-board
 
-Desktop console for the [`chi`](https://github.com/chevp/chi) CLI — an Electron + Angular GUI inspired by MongoDB Compass.
+Desktop console for the [`chi`](https://github.com/chevp/chi) CLI — an Electron + Angular GUI modeled on chi's own `context/prototypes/ux-console`.
 
-> Status: **v0 scaffold.** Two views (Status, Settings) wired against a live `chi` library import. UI design system adapted from cura-console (UXIP-003) with a chi-board blue-violet accent.
+> Status: **v0 scaffold.** Chat-shell + Tools sidebar (status / doctor / help) wired against a live `chi` library import. Settings view for `~/.chi/config`. Chat backend not yet wired — the chat surface is a host for tool output.
 
 ## What it is
 
-`chi-board` is a desktop app that gives the `chi` CLI a graphical surface:
+`che-board` gives the `chi` CLI a graphical surface, faithful to chi's `ux-console` prototype:
 
-- **Status** — pick a repo, run `chi status`, see the streamed output in a terminal panel.
-- **Settings** — read/write `~/.chi/config` (Anthropic, LLM gateway, Ollama, misc) without dropping into a shell.
-
-More views (Commit, Console, Issues) are planned. See [Roadmap](#roadmap).
+- **Workspace · Chat** — primary view with model picker (placeholder), feed, composer.
+- **Tools** — sidebar buttons that run a chi command and inject its output into the feed as a `msg-tool` bubble. v0 ships **status**, **doctor**, **help**.
+- **Settings** — sectioned form over `~/.chi/config` (Anthropic, LLM gateway, Ollama, misc).
 
 ## How it links to chi
 
 `chi` is consumed as a library, not by shelling out to the binary:
 
 ```
-chi-board/electron/chi-bridge.ts
-  └─ require.resolve("chi/dist/commands/status.js")
+che-board/electron/chi-bridge.ts
+  └─ require.resolve("chi/dist/commands/<tool>.js")
      └─ dynamic import + stdout capture
 ```
 
-The `chi` package is declared as a `file:` dependency on the sibling repo (`../../tools/chi`). That keeps `chi-board` decoupled from whatever `chi` is on the user's `PATH`, and the two repos can evolve together via the local link.
+`chi` is declared as a `file:` dependency on the sibling repo (`../../tools/chi`). The two repos evolve together via the local link, independent of whatever `chi` is on the user's `PATH`.
 
-> Note: `chi` does not (yet) expose a JS API — its commands write directly to `process.stdout`. The bridge patches `process.stdout.write` for the duration of each invocation and restores it afterwards. This is a known shim and will go away once `chi` exposes structured command outputs.
+> Note: `chi` doesn't (yet) export a JS API — its commands write directly to `process.stdout`. The bridge patches `process.stdout.write` for the duration of each call and restores it afterwards. This shim goes away once `chi` exposes structured command outputs.
 
 ## Stack
 
 - **Electron** 33 (main process in TypeScript, CommonJS output)
 - **Angular** 19 (standalone components, hash-routed)
 - **TypeScript** strict mode
-- **SCSS** with cura-console design tokens
+- **SCSS** with chi's `ux-console` design tokens (tan accent, `#d2a878`)
 - No state-management library; signals only.
 
 ## Running locally
 
 ```sh
-# 1. Make sure chi is built (chi-board imports compiled chi/dist/*)
+# 1. Make sure chi is built (che-board imports compiled chi/dist/*)
 cd ../../tools/chi && npm install && npm run build
 
-# 2. chi-board
+# 2. che-board
 cd -
 npm install
 npm run dev
@@ -62,20 +61,20 @@ npm start
 ## Layout
 
 ```
-chi-board/
+che-board/
 ├── electron/                 # Electron main process (CJS)
 │   ├── main.ts               # window creation, dev-server URL
-│   ├── preload.ts            # contextBridge — exposes window.chiBoard
+│   ├── preload.ts            # contextBridge — exposes window.cheBoard
 │   └── chi-bridge.ts         # chi library imports + stdout capture
 ├── src/                      # Angular renderer
-│   ├── styles.scss           # design tokens (cura-console palette, rebranded)
+│   ├── styles.scss           # chi ux-console design tokens (tan accent)
 │   ├── index.html
 │   ├── main.ts               # bootstrapApplication
 │   └── app/
-│       ├── app.component.*   # sidebar + outlet shell
+│       ├── app.component.*   # chat-shell + Tools sidebar
 │       ├── shared/chi-ipc.service.ts
 │       └── views/
-│           ├── status/
+│           ├── chat/         # primary view — feed + composer + tool bubbles
 │           └── settings/
 ├── scripts/wait-and-launch.mjs
 └── angular.json | tsconfig.json | package.json
@@ -83,25 +82,24 @@ chi-board/
 
 ## Design system
 
-The palette and component patterns are adapted from `cura/frontend/cura-app/public/uxip-003-cura-console`:
+The palette and component patterns come directly from [chi/context/prototypes/ux-console](https://github.com/chevp/chi/tree/main/context/prototypes/ux-console):
 
-| Token | cura-console | chi-board |
-|-------|--------------|-----------|
-| canvas | `#212121` | `#1a1b1f` |
-| sidebar | `#181818` | `#131418` |
-| accent | `#d2a878` (tan) | `#78a0f0` (blue-violet) |
-
-Same dark-elevation system, same sidebar/topbar/composer geometry, different brand colour.
+| Token | Value |
+|-------|-------|
+| canvas | `#212121` |
+| sidebar | `#181818` |
+| accent | `#d2a878` (tan) |
+| accent-text | `#14171c` |
+| mono | JetBrains Mono |
+| sans | DM Sans |
 
 ## Roadmap
 
-Tracked informally for now; planned views:
-
-- [ ] **Commit** — staged diff + AI-generated message preview (`chi commit`)
-- [ ] **Console** — free-form `chi <cmd>` runner with streaming output
+- [ ] Wire chat to a chi orchestrator endpoint (currently a placeholder)
+- [ ] **Commit** tool — staged diff + AI-generated message preview
+- [ ] **Console** — free-form `chi <cmd>` runner
 - [ ] **Workflows** — list & run `.che/workflows/*.yml`
-- [ ] **Issues** — list / create / triage (`chi issue`)
-- [ ] **Doctor** — environment check
+- [ ] **Issues** — list / create / triage
 
 ## License
 

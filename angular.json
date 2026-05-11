@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "chi-board": {
+    "che-board": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -47,8 +47,8 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
-            "production": { "buildTarget": "chi-board:build:production" },
-            "development": { "buildTarget": "chi-board:build:development" }
+            "production": { "buildTarget": "che-board:build:production" },
+            "development": { "buildTarget": "che-board:build:development" }
           },
           "defaultConfiguration": "development"
         }

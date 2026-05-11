@@ -1,13 +1,13 @@
 {
-  "name": "chi-board",
+  "name": "che-board",
   "version": "0.1.0",
-  "description": "Desktop console for the chi CLI — Electron + Angular GUI, MongoDB-Compass style.",
+  "description": "Desktop console for the chi CLI — Electron + Angular GUI, modeled on chi's ux-console prototype.",
   "private": true,
   "main": "dist-electron/main.js",
-  "homepage": "https://github.com/chevp/chi-board",
+  "homepage": "https://github.com/chevp/che-board",
   "repository": {
     "type": "git",
-    "url": "https://github.com/chevp/chi-board.git"
+    "url": "https://github.com/chevp/che-board.git"
   },
   "license": "Apache-2.0",
   "author": "chevp",

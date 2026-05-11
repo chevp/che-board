@@ -6,9 +6,12 @@ import { homedir } from "node:os";
 /**
  * Chi is consumed as a library (file: dep). It has no `exports` map and writes
  * directly to process.stdout, so we resolve subpaths into the installed copy
- * and patch the stream during each invocation. Keeps chi-board decoupled from
+ * and patch the stream during each invocation. Keeps che-board decoupled from
  * the `chi` shell binary on PATH.
  */
+
+type ToolName = "status" | "doctor" | "help";
+const TOOLS: ReadonlySet<ToolName> = new Set(["status", "doctor", "help"]);
 
 const CHI_CONFIG_FILE = process.env["CHI_CONFIG_FILE"] ?? path.join(homedir(), ".chi", "config");
 
@@ -115,12 +118,15 @@ export function registerChiIpc(ipcMain: IpcMain, dialog: Dialog): void {
     return result.filePaths[0];
   });
 
-  ipcMain.handle("chi:runStatus", async (_evt, repoPath: string): Promise<CaptureResult> => {
-    if (!repoPath || !fs.existsSync(repoPath)) {
+  ipcMain.handle("chi:runTool", async (_evt, tool: ToolName, repoPath: string): Promise<CaptureResult> => {
+    if (!TOOLS.has(tool)) {
+      return { stdout: "", stderr: `unknown tool: ${tool}\n`, code: 1 };
+    }
+    if (tool !== "help" && (!repoPath || !fs.existsSync(repoPath))) {
       return { stdout: "", stderr: `repo path not found: ${repoPath}\n`, code: 1 };
     }
-    const cmd = await importChiCommand("status");
-    return captureRun(repoPath, cmd.run, []);
+    const cmd = await importChiCommand(tool);
+    return captureRun(repoPath || process.cwd(), cmd.run, []);
   });
 
   ipcMain.handle("chi:readConfig", async () => readConfigFile());
