@@ -22,7 +22,7 @@ che-board/electron/chi-bridge.ts
      └─ dynamic import + stdout capture
 ```
 
-`chi` is declared as a `file:` dependency on the sibling repo (`../../tools/chi`). The two repos evolve together via the local link, independent of whatever `chi` is on the user's `PATH`.
+`chi` is declared as a `github:chevp/chi` dependency. chi commits its compiled `dist/` to git, so `npm install` pulls a ready-to-import package — no separate build step against the sibling repo is needed.
 
 > Note: `chi` doesn't (yet) export a JS API — its commands write directly to `process.stdout`. The bridge patches `process.stdout.write` for the duration of each call and restores it afterwards. This shim goes away once `chi` exposes structured command outputs.
 
@@ -37,11 +37,6 @@ che-board/electron/chi-bridge.ts
 ## Running locally
 
 ```sh
-# 1. Make sure chi is built (che-board imports compiled chi/dist/*)
-cd ../../tools/chi && npm install && npm run build
-
-# 2. che-board
-cd -
 npm install
 npm run dev
 ```
